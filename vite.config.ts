@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "../dist/spa", // Build output goes outside client/
     emptyOutDir: true,
+    base: "./",           // <--- Added this line for relative asset paths
   },
   plugins: [react(), expressPlugin()],
   resolve: {
