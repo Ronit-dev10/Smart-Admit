@@ -1,7 +1,14 @@
 import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { createServer } from "./server";
+
+let createServer: (() => any) | undefined;
+
+try {
+  createServer = require("./server").createServer;
+} catch {
+  // Ignore if ./server doesn't exist (e.g., in production build)
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -30,6 +37,7 @@ function expressPlugin(): Plugin {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
     configureServer(server) {
+      if (!createServer) return;
       const app = createServer();
 
       // Add Express app as middleware to Vite dev server
