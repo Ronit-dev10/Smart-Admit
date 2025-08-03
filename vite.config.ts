@@ -7,25 +7,23 @@ let createServer: (() => any) | undefined;
 try {
   createServer = require("./server").createServer;
 } catch {
-  // Ignore if ./server doesn't exist (e.g., in production build)
+  // Ignore error in production
 }
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  root: "client", // Tell Vite the root folder where index.html lives
+  root: "client", // Important: index.html is in client/
   server: {
     host: "::",
     port: 8080,
     fs: {
-      // Since root is "client", allow access to shared folder relative to root
       allow: ["../shared"],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "../server/**"],
     },
   },
   build: {
-    // Build output relative to root, so go up one folder to dist/spa
-    outDir: "../dist/spa",
-    emptyOutDir: true, // Clean output folder on build
+    outDir: "../dist/spa", // Build output goes outside client/
+    emptyOutDir: true,
   },
   plugins: [react(), expressPlugin()],
   resolve: {
@@ -39,12 +37,10 @@ export default defineConfig(({ mode }) => ({
 function expressPlugin(): Plugin {
   return {
     name: "express-plugin",
-    apply: "serve", // Only during development
+    apply: "serve",
     configureServer(server) {
       if (!createServer) return;
       const app = createServer();
-
-      // Use express app as middleware in vite dev server
       server.middlewares.use(app);
     },
   };
